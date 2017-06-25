@@ -329,14 +329,16 @@ class Diff(BaseModel):
 
 def setup_logging():
     path = config.get('log', home_path('diffengine.log'))
+    loglevel = config.get('loglevel', "INFO")
     logging.basicConfig(
-        level=logging.INFO,
+        level=loglevel,
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         filename=path,
         filemode="a"
     )
     logging.getLogger("readability.readability").setLevel(logging.WARNING)
     logging.getLogger("tweepy.binder").setLevel(logging.WARNING)
+    logging.getLogger("peewee").setLevel(logging.WARNING)
 
 def load_config(prompt=True):
     global config
@@ -351,7 +353,7 @@ def load_config(prompt=True):
         yaml.dump(config, open(config_file, "w"), default_flow_style=False)
 
 def get_initial_config():
-    config = {"feeds": [], "phantomjs": "phantomjs"}
+    config = {"feeds": [], "phantomjs": "phantomjs", "loglevel": "INFO"}
 
     while len(config['feeds']) == 0:
         url = input("What RSS/Atom feed would you like to monitor? ")
