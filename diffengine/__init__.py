@@ -66,15 +66,22 @@ class Feed(BaseModel):
             return 0
         count = 0
         for e in feed.entries:
-            # note: look up with url only, because there may be 
+            # note: look up with url only, because there may be
             # overlap bewteen feeds, especially when a large newspaper
             # has multiple feeds
+            urlregex = config.get('urlregex', None)
+            if urlregex:
+                try:
+                    e.link = re.findall(urlregex, e.link)[0]
+                    print (e.link)
+                except IndexError:
+                    pass
             entry, created = Entry.get_or_create(url=e.link)
             if created:
                 FeedEntry.create(entry=entry, feed=self)
                 logging.info("found new entry: %s", e.link)
                 count += 1
-            elif len(entry.feeds.where(Feed.url == self.url)) == 0: 
+            elif len(entry.feeds.where(Feed.url == self.url)) == 0:
                 FeedEntry.create(entry=entry, feed=self)
                 logging.debug("found entry from another feed: %s", e.link)
                 count += 1
