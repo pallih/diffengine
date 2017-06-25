@@ -144,7 +144,7 @@ class Entry(BaseModel):
         """
 
         # make sure we don't go too fast
-        time.sleep(1)
+        time.sleep(.5)
 
         # fetch the current readability-ized content for the page
         logging.info("checking %s", self.url)
