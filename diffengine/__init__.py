@@ -73,7 +73,6 @@ class Feed(BaseModel):
             if urlregex:
                 try:
                     e.link = re.findall(urlregex, e.link)[0]
-                    print (e.link)
                 except IndexError:
                     pass
             entry, created = Entry.get_or_create(url=e.link)
