@@ -157,10 +157,10 @@ class Entry(BaseModel):
         if resp.status_code != 200:
             logging.warn("Got %s when fetching %s", resp.status_code, self.url)
             return None
-
+        html_partial = config.get("html_partial", True)
         doc = readability.Document(resp.text)
         title = doc.title()
-        summary = doc.summary(html_partial=True)
+        summary = doc.summary(html_partial=html_partial)
         summary = bleach.clean(summary, tags=["p"], strip=True)
         summary = _normal(summary)
 
@@ -359,7 +359,8 @@ def load_config(prompt=True):
         yaml.dump(config, open(config_file, "w"), default_flow_style=False)
 
 def get_initial_config():
-    config = {"feeds": [], "phantomjs": "phantomjs", "loglevel": "INFO"}
+    config = {"feeds": [], "phantomjs": "phantomjs", "loglevel": "INFO",
+    "html_partial": "True"}
 
     while len(config['feeds']) == 0:
         url = input("What RSS/Atom feed would you like to monitor? ")
