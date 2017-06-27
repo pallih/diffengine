@@ -505,6 +505,7 @@ def _dt(d):
 def _normal(s):
     # additional normalizations for readability + bleached text
     s = s.replace("\xa0", " ")
+    s = s.replace("\xad", "")
     s = s.replace('“', '"')
     s = s.replace('”', '"')
     s = s.replace("’", "'")
