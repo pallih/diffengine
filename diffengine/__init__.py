@@ -29,6 +29,9 @@ from datetime import datetime, timedelta
 from selenium import webdriver
 from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
 
+from lxml.etree import tostring
+from lxml.html import fromstring
+
 home = None
 config = {}
 db = SqliteDatabase(None)
@@ -160,7 +163,20 @@ class Entry(BaseModel):
         html_partial = config.get("html_partial", True)
         negative_keywords = config.get("negative_keywords", None)
         positive_keywords = config.get("positive_keywords", None)
-        doc = readability.Document(resp.text, negative_keywords=negative_keywords,
+        kill_classes = config.get("kill_classes", None)
+        resp_text = resp.text
+        if kill_classes:
+            tree = fromstring(resp_text)
+            try:
+                for kill_class in kill_classes:
+                    for elem in tree.find_class(kill_class):
+                        logging.debug("dropped tag: {} from kill class: {}".format(str(elem.tag), kill_class))
+                        elem.drop_tree()
+            except Exception as e:
+                logging.error(e)
+            resp_text = tostring(tree)
+
+        doc = readability.Document(resp_text, negative_keywords=negative_keywords,
                                    positive_keywords=positive_keywords)
         title = doc.title()
         summary = doc.summary(html_partial=html_partial)
@@ -363,7 +379,8 @@ def load_config(prompt=True):
 
 def get_initial_config():
     config = {"feeds": [], "phantomjs": "phantomjs", "loglevel": "INFO",
-    "html_partial": "True", "negative_keywords": "", "positive_keywords":""}
+    "html_partial": "True", "negative_keywords": "", "positive_keywords":"",
+    "kill_classes": ""}
 
     while len(config['feeds']) == 0:
         url = input("What RSS/Atom feed would you like to monitor? ")
