@@ -158,7 +158,10 @@ class Entry(BaseModel):
             logging.warn("Got %s when fetching %s", resp.status_code, self.url)
             return None
         html_partial = config.get("html_partial", True)
-        doc = readability.Document(resp.text)
+        negative_keywords = config.get("negative_keywords", None)
+        positive_keywords = config.get("positive_keywords", None)
+        doc = readability.Document(resp.text, negative_keywords=negative_keywords,
+                                   positive_keywords=positive_keywords)
         title = doc.title()
         summary = doc.summary(html_partial=html_partial)
         summary = bleach.clean(summary, tags=["p"], strip=True)
@@ -360,7 +363,7 @@ def load_config(prompt=True):
 
 def get_initial_config():
     config = {"feeds": [], "phantomjs": "phantomjs", "loglevel": "INFO",
-    "html_partial": "True"}
+    "html_partial": "True", "negative_keywords": "", "positive_keywords":""}
 
     while len(config['feeds']) == 0:
         url = input("What RSS/Atom feed would you like to monitor? ")
