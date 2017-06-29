@@ -180,7 +180,7 @@ class Entry(BaseModel):
                 try:
                     for drop_class in drop_classes:
                         for elem in tree.find_class(drop_class):
-                            logging.debug("dropped tag: {} from drop class: {}".format(str(elem.tag), kill_class))
+                            logging.debug("dropped tag: {} from drop class: {}".format(str(elem.tag), drop_class))
                             elem.drop_tag()
                 except Exception as e:
                     logging.error(e)
