@@ -164,16 +164,26 @@ class Entry(BaseModel):
         negative_keywords = config.get("negative_keywords", None)
         positive_keywords = config.get("positive_keywords", None)
         kill_classes = config.get("kill_classes", None)
+        drop_classes = config.get("drop_classes", None)
         resp_text = resp.text
-        if kill_classes:
+        if any((kill_classes, drop_classes)):
             tree = fromstring(resp_text)
-            try:
-                for kill_class in kill_classes:
-                    for elem in tree.find_class(kill_class):
-                        logging.debug("dropped tag: {} from kill class: {}".format(str(elem.tag), kill_class))
-                        elem.drop_tree()
-            except Exception as e:
-                logging.error(e)
+            if kill_classes:
+                try:
+                    for kill_class in kill_classes:
+                        for elem in tree.find_class(kill_class):
+                            logging.debug("killed tag: {} from kill class: {}".format(str(elem.tag), kill_class))
+                            elem.drop_tree()
+                except Exception as e:
+                    logging.error(e)
+            if drop_classes:
+                try:
+                    for drop_class in drop_classes:
+                        for elem in tree.find_class(drop_class):
+                            logging.debug("dropped tag: {} from drop class: {}".format(str(elem.tag), kill_class))
+                            elem.drop_tag()
+                except Exception as e:
+                    logging.error(e)
             resp_text = tostring(tree)
 
         doc = readability.Document(resp_text, negative_keywords=negative_keywords,
